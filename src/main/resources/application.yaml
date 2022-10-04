@@ -1,0 +1,13 @@
+server:
+  port: 9000
+logging:
+  level:
+    root: info
+com:
+  closa:
+    translate:
+      locales:
+        implemented: en,fr,es,ca,zu
+        default: en
+      properties:
+        baseName: test0

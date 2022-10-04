@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "com.closa.translate.locales.implemented",
+      "type": "java.lang.String",
+      "description": "List the supported Locales for your application."
+    },
+    {
+      "name": "com.closa.translate.locales.default",
+      "type": "java.lang.String",
+      "description": "This will be the default Locale used by the system in case that the requested one is not available."
+    },
+    {
+      "name": "com.closa.translate.properties.baseName",
+      "type": "java.lang.String",
+      "description": "This is the default baseName used by the Translate Engine."
+    }
+  ] }
