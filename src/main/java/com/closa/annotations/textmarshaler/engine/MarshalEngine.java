@@ -1,10 +1,15 @@
 package com.closa.annotations.textmarshaler.engine;
 
-import com.closa.annotations.textmarshaler.interfaces.*;
+import com.closa.annotations.textmarshaler.interfaces.TXTMarshallString;
+import com.closa.annotations.textmarshaler.interfaces.TXTMarshallChar;
+import com.closa.annotations.textmarshaler.interfaces.TXTMarshallBoolean;
+import com.closa.annotations.textmarshaler.interfaces.TXTMarshallDate;
+import com.closa.annotations.textmarshaler.interfaces.TXTMarshallNumber;
 import com.closa.annotations.textmarshaler.interfaces.levelclass.TXTMarshall;
 import com.closa.annotations.textmarshaler.model.WorkingObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 
 import java.lang.annotation.Annotation;
@@ -43,7 +48,7 @@ public class MarshalEngine {
         Field[] fields = obj.getClass().getDeclaredFields();
         List<Field> fieldList = Arrays.stream(fields).filter(x -> !x.isSynthetic()).collect(Collectors.toList());
         for (Field current : fieldList) {
-            buildTheMap(current, annot);
+            buildTheMap(current);
         }
         /**
          * We should have the full class map.
@@ -61,6 +66,7 @@ public class MarshalEngine {
             fld.setAccessible(true);
             try {
                 Object o = fld.get(obj);
+                System.out.println(o.toString());
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -72,9 +78,11 @@ public class MarshalEngine {
         return " ";
     }
 
-    private void buildTheMap(Field current, Annotation annot) {
+    private void buildTheMap(Field current ) {
         boolean validCompatibility = false;
-
+        Annotation annot = null;
+        AnnotationUtils.findAnnotation(TXTMarshallString.class, null );
+        boolean x = current.isAnnotationPresent(TXTMarshallString.class) ;
         if (current.isAnnotationPresent(TXTMarshallString.class)) {
             annot = current.getAnnotation(TXTMarshallString.class);
             validCompatibility = checkTypeCompatibility(current, annot);
@@ -84,6 +92,7 @@ public class MarshalEngine {
                             txtMarshallString.paddingChar(),
                             txtMarshallString.padPosition(),
                             txtMarshallString.nullChar()));
+            return;
         }
 
         if (current.isAnnotationPresent(TXTMarshallChar.class)) {
@@ -93,6 +102,7 @@ public class MarshalEngine {
             shouMap.put(current,
                     new WorkingObject(txtMarshallChar.order(),
                             txtMarshallChar.nullChar()));
+            return;
         }
 
         if (current.isAnnotationPresent(TXTMarshallBoolean.class)) {
@@ -103,6 +113,7 @@ public class MarshalEngine {
                     new WorkingObject(txtMarshallBoolean.order(),
                             txtMarshallBoolean.pattern(),
                             txtMarshallBoolean.nullChar()));
+            return;
         }
         if (current.isAnnotationPresent(TXTMarshallNumber.class)) {
             annot = current.getAnnotation(TXTMarshallNumber.class);
@@ -112,6 +123,7 @@ public class MarshalEngine {
                     new WorkingObject(txtMarshallNumber.order(), txtMarshallNumber.length(),
                            txtMarshallNumber.paddingChar(), txtMarshallNumber.padPosition(),
                             txtMarshallNumber.nullChar()));
+            return;
         }
         if (current.isAnnotationPresent(TXTMarshallDate.class)) {
             annot = current.getAnnotation(TXTMarshallDate.class);
@@ -121,6 +133,7 @@ public class MarshalEngine {
                     new WorkingObject(txtMarshallDate.order(),
                             txtMarshallDate.datePattern(),
                             txtMarshallDate.nullChar()));
+            return;
         }
 
     }
