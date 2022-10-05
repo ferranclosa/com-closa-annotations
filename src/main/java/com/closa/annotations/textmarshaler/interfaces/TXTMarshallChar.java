@@ -1,7 +1,5 @@
 package com.closa.annotations.textmarshaler.interfaces;
 
-import com.closa.annotations.textmarshaler.model.PadPosition;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -1,12 +1,10 @@
 package com.closa.annotations.textmarshaler.engine;
 
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallString;
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallChar;
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallBoolean;
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallDate;
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallNumber;
+import com.closa.annotations.textmarshaler.interfaces.*;
 import com.closa.annotations.textmarshaler.interfaces.levelclass.TXTMarshall;
+import com.closa.annotations.textmarshaler.model.Types;
 import com.closa.annotations.textmarshaler.model.WorkingObject;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -17,17 +15,16 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
-public class MarshalEngine {
+public class LengthEngine {
+
+
     Logger logger = LoggerFactory.getLogger(this.getClass());
-
-
-    public MarshalEngine() {
-
+    public LengthEngine() {
     }
 
+    String result;
     Map<Field, WorkingObject> shouMap = new HashMap<>();
 
     public final String marshal(Object obj) {
@@ -39,7 +36,7 @@ public class MarshalEngine {
             throw new RuntimeException("Error to marshal. @TXTMarshall annotation is missing");
         }
 
-        String result = null;
+        String result = "";
         Annotation annot = null;
         /** Deal with the FIELD level
          *
@@ -48,50 +45,47 @@ public class MarshalEngine {
         Field[] fields = obj.getClass().getDeclaredFields();
         List<Field> fieldList = Arrays.stream(fields).filter(x -> !x.isSynthetic()).collect(Collectors.toList());
         for (Field current : fieldList) {
-            buildTheMap(current);
+            buildTheMap(current, obj);
         }
         /**
          * We should have the full class map.
          * We need to sort it by order
          * and then process each item and build the String
          */
+        result = "";
         Comparator<WorkingObject> byOrder = (WorkingObject obj1, WorkingObject obj2) -> obj1.getOrder().compareTo(obj2.getOrder());
-
         LinkedHashMap<Field, WorkingObject> sortedMap = shouMap.entrySet().stream()
                 .sorted(Map.Entry.<Field, WorkingObject>comparingByValue(byOrder))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
         sortedMap.entrySet().stream().forEach(each -> {
-            Field fld = each.getKey();
             WorkingObject wo = each.getValue();
-            fld.setAccessible(true);
-            try {
-                Object o = fld.get(obj);
-                System.out.println(o.toString());
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            buildTheLength(wo);
 
-        });
+            });
+            return this.result;
+        }
 
-
-
-        return " ";
+    private void buildTheLength(WorkingObject wo) {
     }
 
-    private void buildTheMap(Field current ) {
+
+    @SneakyThrows
+    private void buildTheMap(Field current, Object obj  ) {
         boolean validCompatibility = false;
         Annotation annot = null;
-        AnnotationUtils.findAnnotation(TXTMarshallString.class, null );
-        boolean x = current.isAnnotationPresent(TXTMarshallString.class) ;
-        if (current.isAnnotationPresent(TXTMarshallString.class)) {
-            annot = current.getAnnotation(TXTMarshallString.class);
+        AnnotationUtils.findAnnotation(TXTUnmarshallString.class, null );
+        boolean x = current.isAnnotationPresent(TXTUnmarshallString.class) ;
+        if (current.isAnnotationPresent(TXTUnmarshallString.class)) {
+            annot = current.getAnnotation(TXTUnmarshallString.class);
             validCompatibility = checkTypeCompatibility(current, annot);
-            TXTMarshallString txtMarshallString = (TXTMarshallString) annot;
-            shouMap.put(current,
-                    new WorkingObject(txtMarshallString.order(), txtMarshallString.length(),
-                            txtMarshallString.paddingChar(),
-                            txtMarshallString.padPosition(),
-                            txtMarshallString.nullChar()));
+            TXTUnmarshallString txtUnmarshallString = (TXTUnmarshallString) annot;
+            WorkingObject wo = new WorkingObject(txtUnmarshallString.order(),
+                    txtUnmarshallString.length(),
+                    txtUnmarshallString.nullChar());
+            current.setAccessible(true);
+            wo.setObj(current.get(obj));
+            wo.setType(Types.STRING);
+            shouMap.put(current, wo);
             return;
         }
 
@@ -99,9 +93,12 @@ public class MarshalEngine {
             annot = current.getAnnotation(TXTMarshallChar.class);
             validCompatibility = checkTypeCompatibility(current, annot);
             TXTMarshallChar txtMarshallChar = (TXTMarshallChar) annot;
-            shouMap.put(current,
-                    new WorkingObject(txtMarshallChar.order(),
-                            txtMarshallChar.nullChar()));
+            WorkingObject wo =new WorkingObject(txtMarshallChar.order(),
+                    txtMarshallChar.nullChar());
+            current.setAccessible(true);
+            wo.setObj(current.get(obj));
+            wo.setType(Types.CHARACTER);
+            shouMap.put(current, wo);
             return;
         }
 
@@ -109,30 +106,40 @@ public class MarshalEngine {
             annot = current.getAnnotation(TXTMarshallBoolean.class);
             validCompatibility = checkTypeCompatibility(current, annot);
             TXTMarshallBoolean txtMarshallBoolean = (TXTMarshallBoolean) annot;
-            shouMap.put(current,
-                    new WorkingObject(txtMarshallBoolean.order(),
-                            txtMarshallBoolean.pattern(),
-                            txtMarshallBoolean.nullChar()));
+            WorkingObject wo =new WorkingObject(txtMarshallBoolean.order(),
+                    txtMarshallBoolean.pattern(),
+                    txtMarshallBoolean.nullChar());
+            current.setAccessible(true);
+            wo.setObj(current.get(obj));
+            wo.setType(Types.BOOLEAN);
+            shouMap.put(current, wo);
             return;
         }
         if (current.isAnnotationPresent(TXTMarshallNumber.class)) {
             annot = current.getAnnotation(TXTMarshallNumber.class);
             validCompatibility = checkTypeCompatibility(current, annot);
             TXTMarshallNumber txtMarshallNumber = (TXTMarshallNumber) annot;
-            shouMap.put(current,
-                    new WorkingObject(txtMarshallNumber.order(), txtMarshallNumber.length(),
-                           txtMarshallNumber.paddingChar(), txtMarshallNumber.padPosition(),
-                            txtMarshallNumber.nullChar()));
+            WorkingObject wo =new WorkingObject(txtMarshallNumber.order()
+                    , txtMarshallNumber.length(),
+                    txtMarshallNumber.paddingChar(), txtMarshallNumber.padPosition(),
+                    txtMarshallNumber.nullChar());
+            current.setAccessible(true);
+            wo.setObj(current.get(obj));
+            wo.setType(Types.NUMBER);
+            shouMap.put(current, wo);
             return;
         }
         if (current.isAnnotationPresent(TXTMarshallDate.class)) {
             annot = current.getAnnotation(TXTMarshallDate.class);
             validCompatibility = checkTypeCompatibility(current, annot);
             TXTMarshallDate txtMarshallDate = (TXTMarshallDate) annot;
-            shouMap.put(current,
-                    new WorkingObject(txtMarshallDate.order(),
-                            txtMarshallDate.datePattern(),
-                            txtMarshallDate.nullChar()));
+            WorkingObject wo =new WorkingObject(txtMarshallDate.order(),
+                    txtMarshallDate.datePattern(),
+                    txtMarshallDate.nullChar());
+            current.setAccessible(true);
+            wo.setObj(current.get(obj));
+            wo.setType(Types.LOCALDATE);
+            shouMap.put(current, wo);
             return;
         }
 
@@ -159,8 +166,7 @@ public class MarshalEngine {
         if ((annot instanceof TXTMarshallDate) && (fieldType instanceof LocalDate)) {
             return true;
         }
-        return false;
-
+       return false;
     }
 
 

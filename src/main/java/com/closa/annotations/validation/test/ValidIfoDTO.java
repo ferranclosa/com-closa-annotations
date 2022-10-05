@@ -30,4 +30,12 @@ public class ValidIfoDTO {
     public void setValid(boolean valid) {
         this.valid = valid;
     }
+
+    @Override
+    public String toString() {
+        return "ValidIfoDTO{" +
+                "valid=" + valid +
+                ", errors=" + errors +
+                '}';
+    }
 }

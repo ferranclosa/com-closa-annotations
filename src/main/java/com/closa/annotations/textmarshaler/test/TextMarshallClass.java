@@ -1,37 +1,55 @@
 package com.closa.annotations.textmarshaler.test;
 
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallBoolean;
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallDate;
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallNumber;
+import com.closa.annotations.textmarshaler.interfaces.*;
 import com.closa.annotations.textmarshaler.interfaces.levelclass.TXTMarshall;
-import com.closa.annotations.textmarshaler.interfaces.TXTMarshallString;
+import com.closa.annotations.textmarshaler.interfaces.levelclass.TXTUnmarshall;
 import com.closa.annotations.textmarshaler.model.BooleanPattern;
 import com.closa.annotations.textmarshaler.model.DatePattern;
+import com.closa.annotations.textmarshaler.model.PadPosition;
+import com.closa.annotations.validation.interfaces.ValidIf;
+import com.closa.annotations.validation.model.ValidityValues;
 
 import java.time.LocalDate;
 
 
 @TXTMarshall
+@TXTUnmarshall
 public class TextMarshallClass {
-    @TXTMarshallString(order=9, length = 25)
+    @TXTMarshallString(order=70, length = 25)
+    @TXTUnmarshallString(order=70, length = 25)
     private String name;
 
-    @TXTMarshallString(order = 2, length=45)
+    @TXTMarshallString(order=80, length = 50)
+    @TXTUnmarshallString(order=80, length = 50)
+    private String lastname;
+
+    @TXTMarshallChar(order=75, nullChar = '!')
+    @TXTUnmarshallChar(order=75, nullChar = '!')
+    private Character clientCode;
+
+    @TXTMarshallString(order = 60, length=45)
+    @TXTUnmarshallString(order = 60, length=45)
     private String address1;
 
-    @TXTMarshallString(order = 3, length=45)
+    @TXTMarshallString(order = 50, length=45)
+    @TXTUnmarshallString(order = 50, length=45)
     private String address2;
 
-    @TXTMarshallString(order = 15, length=45)
+    @TXTMarshallString(order = 40, length=45)
+    @TXTUnmarshallString(order = 40, length=45)
     private String address3;
 
-    @TXTMarshallNumber(order = 5, length=12)
+    @TXTMarshallNumber(order = 30, length=9, paddingChar = ' ', padPosition = PadPosition.atEnd)
+    @TXTUnmarshallNumber(order = 30, length=9)
     private Integer postcode;
 
-    @TXTMarshallBoolean(order = 6, pattern = BooleanPattern.Binary, nullChar = '!')
+    @TXTMarshallBoolean(order = 10, pattern = BooleanPattern.YesNo, nullChar = '!')
+    @TXTUnmarshallBoolean(order = 10, pattern = BooleanPattern.YesNo, nullChar = '!')
     private Boolean marriedStatus;
 
-    @TXTMarshallDate(order = 7, datePattern = DatePattern.Y2MD)
+    @TXTMarshallDate(order = 20, datePattern = DatePattern.Y4MD)
+    @TXTUnmarshallDate(order = 20, datePattern = DatePattern.Y4MD)
+    @ValidIf(field = "marriedStatus", is= ValidityValues.TRUE)
     private LocalDate marriedDate;
 
     public TextMarshallClass() {
@@ -55,6 +73,14 @@ public class TextMarshallClass {
 
     public Integer getPostcode() {
         return postcode;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
     public Boolean getMarriedStatus() {
@@ -91,5 +117,13 @@ public class TextMarshallClass {
 
     public void setMarriedDate(LocalDate marriedDate) {
         this.marriedDate = marriedDate;
+    }
+
+    public Character getClientCode() {
+        return clientCode;
+    }
+
+    public void setClientCode(Character clientCode) {
+        this.clientCode = clientCode;
     }
 }

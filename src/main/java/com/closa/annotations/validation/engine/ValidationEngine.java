@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,6 +113,8 @@ public class ValidationEngine {
         String strVal = null;
         Boolean boolVal = null;
         Number numVal = null;
+        LocalDate dateVal = null;
+        Character charVal = null ;
         /**
          * Get the value of theOther
          */
@@ -127,6 +130,12 @@ public class ValidationEngine {
             }
             if (valueInTheOther instanceof Boolean) {
                 boolVal = (Boolean) valueInTheOther;
+            }
+            if (valueInTheOther instanceof Character) {
+                charVal = (Character) valueInTheOther;
+            }
+            if (valueInTheOther instanceof LocalDate) {
+                dateVal = (LocalDate) valueInTheOther;
             }
         } catch (IllegalAccessException e) {
             System.out.println("It should not happen as accesible is true");
@@ -176,6 +185,14 @@ public class ValidationEngine {
             case ZERO:
                 if (numVal.longValue() != 0) {
                     errors.add("Invalid value in  [" + theOther.getName() + "] ( it should be 0)  with regards to [" + current.getName() + "]");
+                }
+            case PAST:
+                if (!dateVal.isBefore(LocalDate.now())) {
+                    errors.add("Invalid value in  [" + theOther.getName() + "] ( it should be in the Past)  with regards to [" + current.getName() + "]");
+                }
+            case FUTURE:
+                if (!dateVal.isAfter(LocalDate.now())) {
+                    errors.add("Invalid value in  [" + theOther.getName() + "] ( it should be in the Future)  with regards to [" + current.getName() + "]");
                 }
                 break;
         }
@@ -272,6 +289,13 @@ public class ValidationEngine {
                 || otherType.equalsIgnoreCase(String.valueOf(ValidTypes.CHAR))
         ) {
             oneOf = ValidTypes.STRING;
+            return oneOf;
+        }
+        if (otherType.equalsIgnoreCase(String.valueOf(ValidTypes.LOCALDATETIME))
+                || otherType.equalsIgnoreCase(String.valueOf(ValidTypes.LOCALEDATE))
+
+        ) {
+            oneOf = ValidTypes.DATE;
             return oneOf;
         }
         return oneOf;

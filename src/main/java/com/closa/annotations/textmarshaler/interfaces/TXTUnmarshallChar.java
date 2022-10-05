@@ -1,6 +1,6 @@
 package com.closa.annotations.textmarshaler.interfaces;
 
-import com.closa.annotations.textmarshaler.model.DatePattern;
+import com.closa.annotations.textmarshaler.model.BooleanPattern;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TXTMarshallDate {
+public @interface TXTUnmarshallChar {
     int order();
-    DatePattern datePattern() default DatePattern.Y4MD;
+    BooleanPattern pattern() default BooleanPattern.Binary;
     char nullChar() default '~';
 }

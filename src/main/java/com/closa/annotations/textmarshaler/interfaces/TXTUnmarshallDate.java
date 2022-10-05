@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TXTMarshallDate {
+public @interface TXTUnmarshallDate {
     int order();
-    DatePattern datePattern() default DatePattern.Y4MD;
+    DatePattern datePattern() ;
     char nullChar() default '~';
 }
